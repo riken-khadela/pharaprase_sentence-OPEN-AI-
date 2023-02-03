@@ -2,14 +2,16 @@ from django.core.management.base import BaseCommand
 from tqdm import tqdm
 import re
 import json
-from home.models import Text
+from app.models import Text
 
 
-filename = 'data.json'
+filename = '/home/nikunj/Downloads/open_ai/data.json'
 with open(filename, 'r', encoding='utf-8') as f:
     data = f.readlines()
+    # print(data)
 new_data = []
 for line in data:
+    # print(json.loads(line)['text'])
     new_data.append(json.loads(line)['text'].replace('\n', ' '))
 alphabets = "([A-Za-z])"
 prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
@@ -66,7 +68,7 @@ class Command(BaseCommand):
             add accounts in 
             '''
     
-    def handle(self, *args, **options):
+    def handle(self, *args, **option):
 
         
         max_len = 0
@@ -75,22 +77,28 @@ class Command(BaseCommand):
         for sentences in tqdm(new_data):
             for sentence in split_into_sentences(sentences):
                 ind += 1
-                if ind < 55000 : 
-                    print(ind)
-                    continue
-                if len(sentence) > 500:
-                    continue
+                # print(len(sentence))
+                # if ind < 55000 :                     
+                #     continue
+                
+                # if len(sentence) > 500:
+                #     print(".......")
+                #     continue
+                print(sentence)
                 matches = re.findall(
                     r'(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])', sentence)
-                if len(matches) > 0:
-                    continue
-                if len(sentence) < 10:
-                    continue    
+                print(matches,"mmmm")
+                # if len(matches) > 0:
+                #     continue
+                # if len(sentence) < 10:
+                #     continue    
                 
+                print("--->",sentence)
                 
-                Text.objects.get_or_create(
+                aa=Text.objects.create(
                     text = sentence
                 )
+                print(aa)
                 # print(text)
                 # session.add(Original(sentence=sentence, text_number=ind))
             # break
