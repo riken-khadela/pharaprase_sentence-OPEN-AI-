@@ -79,12 +79,129 @@ class YoutubeBot:
             print(f'Inputed "{text}" for the element: {element}')
             return ele    
     
+    def login_account(self):
+
+        login_page = self.driver.find_elements(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
+        login_page_text = login_page.text
+
+        if str(login_page_text).upper() == "Log in with your OpenAI account to continue".upper():
+
+            login_button = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[4]/button[1]')
+            login_button.click()
+
+            while True:
+                try:
+                    login_next_page = self.driver.find_element(By.XPATH,'/html/body/main/section/div/div/header/h1')
+                    login_next_page_text = login_next_page.text
+                    if str(login_next_page_text).upper() == "Welcome back".upper():
+                        break
+                except:
+                    pass
+            
+            email_box = self.driver.find_element(By.XPATH,'//*[@id="username"]')
+            email_box.send_keys("email")
+
+            continue_btn_one = self.driver.find_element(By.XPATH,'/html/body/main/section/div/div/div/form/div[2]/button')
+            continue_btn_one.click()
+            
+            while True:
+                try:
+                    password_page = self.driver.find_element(By.XPATH,'/html/body/main/section/div/div/header/h1')
+                    password_page_text = password_page.text
+                    if str(password_page_text).upper() == "Enter your password".upper():
+                        break
+                except:
+                    pass
+            
+            password_box = self.driver.find_element(By.XPATH,'//*[@id="password"]')
+            password_box.send_keys("password")
+
+            continue_btn_two = self.driver.find_element(By.XPATH,'/html/body/main/section/div/div/div/form/div[2]/button')
+            continue_btn_two.click()
+
+
+            
+
     def work(self):
         print("dasdasd")
         for i in TxtObj.objects.all() :
             print("dasdasd---",i)
             self.get_driver()
             self.driver.get('https://chat.openai.com/chat')
+            time.sleep(random.randint(5,10))
+            
+            while True:
+                try:
+                    verify_one = self.driver.find_elements(By.XPATH,'//*[@id="cf-stage"]/div[6]/label')
+                    verify_text = verify_one.text
+                    if str(verify_text).upper() == "Verify you are human".upper():
+                        verify_box = self.driver.find_elements(By.XPATH,'//*[@id="cf-stage"]/div[6]/label/span')
+                        verify_box.click()
+                except:
+                    try:
+                        verify_two = self.driver.find_elements(By.XPATH,'//*[@id="challenge-stage"]/div/input')
+                        verify_two_text = verify_two.get_attribute("value")
+
+                        if str(verify_two_text).upper() == "Verify you are human".upper():
+                            verify_two.click()
+                    except:
+                        pass
+                
+                try:
+                    home_page = self.driver.find_elements(By.XPATH,'//*[@id="__next"]/div[1]/div[1]/main/div[1]/div/div/div/div[1]/h1')
+                    home_page_text = home_page.text
+                    if str(home_page_text).upper() == "ChatGPT".upper():
+                        break
+                except:
+                    try:
+                        session_expired = self.driver.find_elements(By.XPATH,'//*[@id="headlessui-dialog-title-:r4:"]')
+                        session_expired_text = session_expired.text
+                        if str(session_expired_text).upper() ==  "Your session has expired".upper():
+                            break
+                    except:
+                        try:
+                            login_page = self.driver.find_elements(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
+                            login_page_text = login_page.text
+                            if str(login_page_text).upper() == "Log in with your OpenAI account to continue".upper():
+                                break
+                        except:
+                            try:
+                                sound_btn = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r1:"]/div[3]/button')
+                                sound_btn_text = sound_btn.text
+                                if str(sound_btn_text).upper() == "Sounds good!".upper():
+                                    break
+                            except:
+                                pass
+
+            try:
+                session_expired = self.driver.find_elements(By.XPATH,'//*[@id="headlessui-dialog-title-:r4:"]')
+                session_expired_text = session_expired.text
+                if str(session_expired_text).upper() ==  "Your session has expired".upper():
+                    session_expired_loginbtn = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r3:"]/div[2]/button')
+                    session_expired_loginbtn.click()
+                    time.sleep(random.randint(5,10))
+                    self.login_account()
+            except:
+                pass
+
+
+            try:
+                login_page = self.driver.find_elements(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
+                login_page_text = login_page.text
+                if str(login_page_text).upper() == "Log in with your OpenAI account to continue".upper():
+                    self.login_account()
+            except:
+                pass
+
+            try:
+                sound_btn = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r1:"]/div[3]/button')
+                sound_btn_text = sound_btn.text
+                if str(sound_btn_text).upper() == "Sounds good!".upper():
+                    sound_btn.click()
+            except:
+                pass
+
+
             time.sleep(random.randint(5,10))
             # input("jbb")
             Text = i.text
@@ -134,8 +251,16 @@ class YoutubeBot:
                         if "Too many requests in 1 hour. Try again later." in abc.text:
                             time.sleep(60)
                             break
+                        if "I apologize" in abc.text:
+                            time.sleep(60)
+                            break
                 except:
-                    pass
+                    try:
+                        abc = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div[1]/main/div[1]/div/div/div/div[2]/div/div[1]/div[1]/span')
+                        if abc != None:
+                            break
+                    except:
+                        pass
 
                 latest_responses = all_chat[-1].find_elements(By.XPATH,'//div/div[2]/div[1]/div/div/ol/*')
                 print(len(latest_responses))
