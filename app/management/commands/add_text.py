@@ -5,7 +5,7 @@ import json
 from app.models import Text
 
 
-filename = '/home/nikunj/Downloads/open_ai/data.json'
+filename = 'D:\Workplace\pharaprase_sentence-OPEN-AI-\data.json'
 with open(filename, 'r', encoding='utf-8') as f:
     data = f.readlines()
     # print(data)

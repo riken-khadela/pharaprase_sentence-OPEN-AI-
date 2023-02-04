@@ -17,8 +17,8 @@ class YoutubeBot:
     def get_driver(self) :
         options = uc.ChromeOptions()
         
-        options.add_argument(f"--user-data-dir=/home/nikunj/Downloads/open_ai/profiles") 
-        options.add_argument(f'--profile-directory=Profile') 
+        options.add_argument(f"--user-data-dir=D:\Workplace\pharaprase_sentence-OPEN-AI-\Profiles\profile1") 
+        options.add_argument(f'--profile-directory=Default')
         # options.headless = True
         self.driver = uc.Chrome(use_subprocess=True,options=options)
         self.driver.maximize_window()
@@ -81,7 +81,7 @@ class YoutubeBot:
     
     def login_account(self):
 
-        login_page = self.driver.find_elements(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
+        login_page = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
         login_page_text = login_page.text
 
         if str(login_page_text).upper() == "Log in with your OpenAI account to continue".upper():
@@ -99,7 +99,7 @@ class YoutubeBot:
                     pass
             
             email_box = self.driver.find_element(By.XPATH,'//*[@id="username"]')
-            email_box.send_keys("email")
+            email_box.send_keys("lathipushpa024@gmail.com")
 
             continue_btn_one = self.driver.find_element(By.XPATH,'/html/body/main/section/div/div/div/form/div[2]/button')
             continue_btn_one.click()
@@ -114,10 +114,32 @@ class YoutubeBot:
                     pass
             
             password_box = self.driver.find_element(By.XPATH,'//*[@id="password"]')
-            password_box.send_keys("password")
+            password_box.send_keys("Bhavin@123")
 
             continue_btn_two = self.driver.find_element(By.XPATH,'/html/body/main/section/div/div/div/form/div[2]/button')
             continue_btn_two.click()
+            
+            time.sleep(random.randint(5,10))
+
+            label_find = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[1]/h2/b')
+            label_find_text = label_find.text
+            if str(label_find_text).upper() == "ChatGPT".upper():
+                next_buttom_one = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button')
+                next_buttom_one.click()
+                time.sleep(random.randint(1,3))
+                next_buttom_two = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]')
+                next_buttom_two.click()
+                
+                time.sleep(random.randint(1,3))
+                next_buttom_three = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]')
+                next_buttom_three.click()
+
+            time.sleep(random.randint(5,10))
+            # label # //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[1]/h2/b # <b>ChatGPT</b>
+            # //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button
+
+            # //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]
+            # //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]
 
 
             
@@ -131,50 +153,63 @@ class YoutubeBot:
             time.sleep(random.randint(5,10))
             
             while True:
+                print('111')
                 try:
-                    verify_one = self.driver.find_elements(By.XPATH,'//*[@id="cf-stage"]/div[6]/label')
+                    print('1')
+
+                    verify_one = self.driver.find_element(By.XPATH,'//*[@id="cf-stage"]/div[6]/label')
                     verify_text = verify_one.text
                     if str(verify_text).upper() == "Verify you are human".upper():
-                        verify_box = self.driver.find_elements(By.XPATH,'//*[@id="cf-stage"]/div[6]/label/span')
+                        verify_box = self.driver.find_element(By.XPATH,'//*[@id="cf-stage"]/div[6]/label/span')
                         verify_box.click()
                 except:
+                    print('2')
                     try:
-                        verify_two = self.driver.find_elements(By.XPATH,'//*[@id="challenge-stage"]/div/input')
+                        verify_two = self.driver.find_element(By.XPATH,'//*[@id="challenge-stage"]/div/input')
                         verify_two_text = verify_two.get_attribute("value")
 
                         if str(verify_two_text).upper() == "Verify you are human".upper():
                             verify_two.click()
                     except:
+                        print('3')
                         pass
                 
                 try:
-                    home_page = self.driver.find_elements(By.XPATH,'//*[@id="__next"]/div[1]/div[1]/main/div[1]/div/div/div/div[1]/h1')
+                    print('4')
+                    home_page = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div[1]/main/div[1]/div/div/div/div[1]/h1')
                     home_page_text = home_page.text
                     if str(home_page_text).upper() == "ChatGPT".upper():
                         break
                 except:
+                    print('5')
                     try:
-                        session_expired = self.driver.find_elements(By.XPATH,'//*[@id="headlessui-dialog-title-:r4:"]')
+                        session_expired = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-title-:r4:"]')
                         session_expired_text = session_expired.text
                         if str(session_expired_text).upper() ==  "Your session has expired".upper():
                             break
                     except:
+                        print('6')
                         try:
-                            login_page = self.driver.find_elements(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
+                            login_page = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
                             login_page_text = login_page.text
+                            print(":::----->",login_page_text)
                             if str(login_page_text).upper() == "Log in with your OpenAI account to continue".upper():
                                 break
-                        except:
+                        except Exception as e:
+                            print(str(e))
+                            print('7')
                             try:
                                 sound_btn = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r1:"]/div[3]/button')
                                 sound_btn_text = sound_btn.text
                                 if str(sound_btn_text).upper() == "Sounds good!".upper():
                                     break
                             except:
+                                print('8')
                                 pass
 
             try:
-                session_expired = self.driver.find_elements(By.XPATH,'//*[@id="headlessui-dialog-title-:r4:"]')
+                print('9')
+                session_expired = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-title-:r4:"]')
                 session_expired_text = session_expired.text
                 if str(session_expired_text).upper() ==  "Your session has expired".upper():
                     session_expired_loginbtn = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r3:"]/div[2]/button')
@@ -182,18 +217,31 @@ class YoutubeBot:
                     time.sleep(random.randint(5,10))
                     self.login_account()
             except:
+                print('10')
                 pass
 
-
             try:
-                login_page = self.driver.find_elements(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
+                print('11')
+                login_page = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
                 login_page_text = login_page.text
+                print(":::----->",login_page_text)
                 if str(login_page_text).upper() == "Log in with your OpenAI account to continue".upper():
                     self.login_account()
-            except:
-                pass
+            except Exception as e:
+                print('12')
+                print(str(e))
+
+            # input("sdbasjkd")
+            # try:
+            #     login_page = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
+            #     login_page_text = login_page.text
+            #     if str(login_page_text).upper() == "Log in with your OpenAI account to continue".upper():
+            #         self.login_account()
+            # except:
+            #     pass
 
             try:
+                print('13')
                 sound_btn = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r1:"]/div[3]/button')
                 sound_btn_text = sound_btn.text
                 if str(sound_btn_text).upper() == "Sounds good!".upper():
@@ -239,9 +287,9 @@ class YoutubeBot:
             
             all_chat = self.driver.find_elements(By.XPATH,'//*[@id="__next"]/div/div[1]/main/div[1]/div/div/div/*')
             last_ele = all_chat.pop()
-            print("sfdd")
             not_found_bool = False
             while True:
+                print('222')
                 try:
                     abc = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div[1]/main/div[1]/div/div/div/div[2]/div/div[2]/div[1]/div/div/p')
                     if abc!= None:
@@ -252,7 +300,10 @@ class YoutubeBot:
                             time.sleep(60)
                             break
                         if "I apologize" in abc.text:
-                            time.sleep(60)
+                            not_found_bool = True
+                            break
+                        if "Sorry" in abc.text:
+                            not_found_bool = True
                             break
                 except:
                     try:
@@ -268,6 +319,8 @@ class YoutubeBot:
                 else : time.sleep(10)
             if not_found_bool == False:
                 number_count = 1
+                
+
                 PageTitle = self.driver.title
                 breakpoint()
                 for response in latest_responses :
@@ -288,6 +341,13 @@ class YoutubeBot:
         # input('Enter :')
         self.driver.quit()
 
+
+
+# label # //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[1]/h2/b # <b>ChatGPT</b>
+# //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button
+
+# //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]
+# //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]
 
 # verify box # //*[@id="cf-stage"]/div[6]/label
 
