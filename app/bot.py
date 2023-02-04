@@ -90,6 +90,8 @@ class YoutubeBot:
             Text = i.text
             # Text = "where is the park?"
             print(Text)
+
+            # if ('document.querySelector("#cf-stage > div.ctp-checkbox-container > label > span").click();')
             textArea = self.find_element('text area','/html/body/div/div/div[1]/main/div[2]/form/div/div[2]/textarea') # /html/body/div/div/div[1]/main/div[2]/form/div/div[2]/textarea
             action = ActionChains(self.driver)
             action.move_to_element(textArea)
@@ -160,3 +162,28 @@ class YoutubeBot:
         # breakpoint()
         # input('Enter :')
         self.driver.quit()
+
+
+# verify box # //*[@id="cf-stage"]/div[6]/label
+
+# verify box click # //*[@id="cf-stage"]/div[6]/label/span
+
+# verify input # //*[@id="challenge-stage"]/div/input # document.querySelector("#challenge-stage > div > input[type=button]") # <input type="button" value="Verify you are human" style="margin: 0px; cursor: pointer;">
+
+# session expired # label:- //*[@id="headlessui-dialog-title-:r4:"] # <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-200" id="headlessui-dialog-title-:r4:" data-headlessui-state="open">Your session has expired</h3>
+# session expired # login button:- //*[@id="headlessui-dialog-panel-:r3:"]/div[2]/button # <button class="btn flex justify-center gap-2 btn-neutral" tabindex="0">Log in</button>
+
+
+# login page # label :- //*[@id="__next"]/div[1]/div/div[3] # <div class="mb-4 text-center">Log in with your OpenAI account to continue</div>
+# login page # login button :- //*[@id="__next"]/div[1]/div/div[4]/button[1]  #  <button class="btn flex justify-center gap-2 btn-primary">Log in</button>
+
+# login next page # label:- /html/body/main/section/div/div/header/h1 # <h1 class="cc9990aac c3216fce5">Welcome back</h1>
+# login next page # email box:- //*[@id="username"] #<input class="input ce09e4a4b ca6b0879c" inputmode="email" name="username" id="username" type="text" value="" required="" autocomplete="username" autocapitalize="none" spellcheck="false" autofocus="">
+# login next page # continue button:- /html/body/main/section/div/div/div/form/div[2]/button # <button type="submit" name="action" value="default" class="c8fca5323 cb6b7c993 cee1c07cc c850d9a60 _button-login-id">Continue</button>
+
+
+# login next page # google button:- /html/body/main/section/div/div/div/div[3]/form[2]/button # <button type="submit" class="c5b8edce6 c426c38e7 c723b33d7" data-provider="google"><span class="c7fe15dc1 c3bee28ca" data-provider="google"></span><span class="cc341260d">Continue with Google</span></button>
+# google next page # google login:- //*[@id="view_container"]/div/div/div[2]/div/div[1]/div/form/span/section/div/div/div/div/ul/li[1]/div # <div class="lCoei YZVTmd SmR8" role="link" tabindex="0" jsname="MBVUVe" data-authuser="0" data-identifier="rikenkhadela777@gmail.com" data-item-index="0" null=""><div class="d2laFc"><div class="tgnCOd"><div class="qQWzTd" aria-hidden="true"><img src="https://lh3.googleusercontent.com/-2kvS9bl5i3k/AAAAAAAAAAI/AAAAAAAAAAA/APmPUbFjJvsr9BTLfidWQxR1XgEb26lL5g/s128-c/photo.jpg" alt="" class="r78aae TrZEUc"></div><div class="WBW9sf"><div class="w1I7fb" jsname="V1ur5d">O - 154 Riken Khadela</div><div class="wLBAL" jsname="bQIQze" data-email="rikenkhadela777@gmail.com">rikenkhadela777@gmail.com</div></div></div></div><div class="n3x5Fb" aria-hidden="true"><svg aria-hidden="true" class="stUf5b" fill="currentColor" focusable="false" width="24px" height="24px" viewBox="0 0 24 24" xmlns="https://www.w3.org/2000/svg"><path d="M7 11v2h10v-2H7zm5-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path></svg></div></div>
+
+# sounds good popup # sounds good button # //*[@id="headlessui-dialog-panel-:r1:"]/div[3]/button # <button class="btn flex justify-center gap-2 btn-primary" tabindex="0">Sounds good!</button>
+#sounds good popup box html # <div class="fixed inset-0 z-50 overflow-y-auto"><div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0"><div class="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:p-6 sm:max-w-sm opacity-100 translate-y-0 sm:scale-100" id="headlessui-dialog-panel-:r1:" data-headlessui-state="open"><div class="flex items-center sm:flex"><div class="mt-3 text-center sm:mt-0 sm:text-left"></div></div><div class="mb-6 flex flex-col gap-6"><div class="text-gray-800 dark:text-white">Jan 30 version update</div><div class="text-2xl">Here's what's new</div><div class="prose text-base dark:prose-invert"><ul><li>We’ve upgraded the ChatGPT model with improved factuality and mathematical capabilities.</li></ul></div></div><div class="mt-5 flex flex-col gap-3 sm:mt-4 sm:flex-row-reverse"><button class="btn flex justify-center gap-2 btn-primary" tabindex="0">Sounds good!</button></div></div></div></div>
