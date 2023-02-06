@@ -141,6 +141,70 @@ class YoutubeBot:
             # //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]
             # //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]
 
+    def singup(self):
+        self.get_driver()
+        self.driver.get('https://chat.openai.com/chat')
+        time.sleep(random.randint(5,10))
+
+        login_page = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
+        login_page_text = login_page.text
+
+        if str(login_page_text).upper() == "Log in with your OpenAI account to continue".upper():
+
+            signup_button = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[4]/button[2]')
+            signup_button.click()
+
+            signup_lable = self.driver.find_element(By.XPATH, "/html/body/main/section/div/div/header/h1")
+            signup_lable_text = signup_lable.text
+
+            if signup_lable_text.upper() == "Create your account".upper():
+                email_box = self.driver.find_element(By.XPATH,'//*[@id="email"]')
+                email_box.send_keys("email")
+
+                continue_button_one = self.driver.find_element(By.XPATH,"/html/body/main/section/div/div/div/form/div[2]/button")
+                continue_button_one.click()
+
+                password_box = self.driver.find_element(By.XPATH,'//*[@id="password"]')
+                password_box.send_keys()
+
+                continue_button_two = self.driver.find_element(By.XPATH,"/html/body/main/section/div/div/div/form/div[2]/button")
+                continue_button_two.click()
+
+                verify_label = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/h1')
+                verify_label_text = verify_label.text
+
+                if verify_label_text.upper() == "Verify your email".upper():
+
+                    self.driver.refresh()
+
+                    tell_name_page_label = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/h1')
+                    tell_name_page_label_text = tell_name_page_label.text
+
+                    if tell_name_page_label_text.upper() == "Tell us about you".upper():
+
+                        first_name_box = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/form/div/div/div[1]/input')
+                        first_name_box.send_keys("fisrt name")
+
+                        last_name_box = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/form/div/div/div[2]/input')
+                        last_name_box.send_keys("fisrt name")
+
+                        continue_button_three = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/form/button')
+                        continue_button_three.click()
+
+                        verify_phonenumber_label = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/h1')
+                        verify_phonenumber_label_text = verify_phonenumber_label.text
+
+                        if verify_phonenumber_label_text.upper() == "Verify your phone number".upper():
+
+                            phone_number_box = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/form/div[1]/div/div[2]/input')
+                            phone_number_box.send_keys("phone number")
+
+                            whatsapp_no_btn = self.driver.find_element(By.XPATH,'//*[@id="whatsapp-opt-in-radio-no"]')
+                            whatsapp_no_btn.click()
+
+                            sendcode_button = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/form/button')
+                            sendcode_button.click()
+                            
 
             
 
