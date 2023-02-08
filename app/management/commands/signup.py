@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from app.bot import YoutubeBot
+from app.bot import Bot
 import pandas as pd, random
 
 class Command(BaseCommand):
@@ -9,7 +9,7 @@ class Command(BaseCommand):
     
     def handle(self, *args, **options):
         
-        bot = YoutubeBot()
+        bot = Bot()
         bot.singup()
             
     

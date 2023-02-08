@@ -1,3 +1,4 @@
+import profile
 from django.core.management.base import BaseCommand
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
@@ -9,19 +10,27 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import pyautogui, json
 from .models import Text as TxtObj, ParaphrasedText
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
 
-class YoutubeBot:
+
+class Bot:
     # def __init__(self):
     #     ...
             
     def get_driver(self) :
-        options = uc.ChromeOptions()
+        options = webdriver.ChromeOptions()
         
-        options.add_argument(f"--user-data-dir=D:\Workplace\pharaprase_sentence-OPEN-AI-\Profiles\profile1") 
+        options.add_argument(f"--user-data-dir=Profiles") 
         options.add_argument(f'--profile-directory=Default')
         # options.headless = True
-        self.driver = uc.Chrome(use_subprocess=True,options=options)
-        self.driver.maximize_window()
+        # self.driver = uc.Chrome(use_subprocess=True,options=options)
+        self.driver = webdriver.Chrome(ChromeDriverManager().install())
+        
+        # profile = webdriver.FirefoxProfile('Profiles_FF')
+        # self.driver = webdriver.Firefox(profile)
+        # self.driver.maximize_window()
         
         
     def find_element(self, element, locator, locator_type=By.XPATH,
@@ -214,8 +223,10 @@ class YoutubeBot:
             print("dasdasd---",i)
             self.get_driver()
             self.driver.get('https://chat.openai.com/chat')
+            breakpoint()
+            self.driver.close()
+            break
             time.sleep(random.randint(5,10))
-            
             while True:
                 print('111')
                 try:
