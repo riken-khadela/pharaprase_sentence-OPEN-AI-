@@ -25,8 +25,8 @@ class Bot:
         options.add_argument(f"--user-data-dir=Profiles") 
         options.add_argument(f'--profile-directory=Default')
         # options.headless = True
-        # self.driver = uc.Chrome(use_subprocess=True,options=options)
-        self.driver = webdriver.Chrome(ChromeDriverManager().install())
+        self.driver = uc.Chrome(use_subprocess=True,options=options)
+        # self.driver = webdriver.Chrome(ChromeDriverManager().install())
         
         # profile = webdriver.FirefoxProfile('Profiles_FF')
         # self.driver = webdriver.Firefox(profile)
@@ -149,12 +149,67 @@ class Bot:
 
             # //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]
             # //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]
+            
+
+    def change_window(self,index=0):
+        AllWindow = self.driver.window_handles
+        if index:
+            self.driver.switch_to.window(AllWindow[index])
+            return
+            
+        CurrentWindow = self.driver.current_window_handle
+        for window in AllWindow:
+            if window != CurrentWindow:
+                self.driver.switch_to.window(window)
+                break
+        
+
+    def get_new_email(self):
+        
+        if len(self.driver.window_handles) < 2:
+            self.driver.tab_new('https://yopmail.com')
+        self.change_window()
+        
+        self.click_element('Random Email Genrator','//*[@id="listeliens"]/a[1]')
+        self.click_element('New Email','/html/body/div/div[2]/main/div/div[2]/div/div[1]/div[2]/button[1]')
+        time.sleep(5)
+        self.email = self.find_element('Email','geny',By.ID).text
+        return self.email
+
+    def get_new_password(self,length=random.randint(8,12)):
+        import string,random
+        self.password = ''.join(random.choices(string.ascii_letters + string.digits + string.punctuation, k=length))
+        return self.password
 
     def singup(self):
         self.get_driver()
         self.driver.get('https://chat.openai.com/chat')
-        time.sleep(random.randint(5,10))
-
+        
+        while True:
+                welcome_ele = self.find_element('Welcome','//*[@id="__next"]/div[1]/div/div[3]',timeout=2)
+                if welcome_ele:
+                    if welcome_ele.text == 'Log in with your OpenAI account to continue': break
+                
+                self.driver.refresh()
+        
+        # time.sleep(random.randint(5,10))
+        breakpoint()
+        
+        self.click_element('Sign up btn','//*[@id="__next"]/div[1]/div/div[4]/button[2]')
+        
+        create_acc_h1 = self.find_element('Create acc H1','/html/body/main/section/div/div/header/h1')
+        if create_acc_h1:
+            if 'Create your account' in create_acc_h1.text:
+                self.get_new_email()
+                self.change_window(0)
+                self.input_text(self.email,'Email input','//*[@id="email"]')
+                self.click_element('Continue','/html/body/main/section/div/div/div/form/div[2]/button')
+                self.input_text(self.get_new_password(),'Password Input','//*[@id="password"]')
+                self.click_element('Continue','/html/body/main/section/div/div/div/form/div[2]/button')
+                
+                
+                
+        
         login_page = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
         login_page_text = login_page.text
 
@@ -219,13 +274,29 @@ class Bot:
 
     def work(self):
         print("dasdasd")
+        
         for i in TxtObj.objects.all() :
             print("dasdasd---",i)
             self.get_driver()
             self.driver.get('https://chat.openai.com/chat')
             breakpoint()
-            self.driver.close()
-            break
+            
+            while True:
+                capacity = self.find_element('High capacity','//*[@id="__next"]/div[1]/div/div/div[1]/div[1]',timeout=2)
+                if capacity:
+                    if 'capacity' in capacity.text.lower():
+                        continue
+                
+                # Log in with your OpenAI account to continue
+                
+                welcome_ele = self.find_element('Welcome','//*[@id="__next"]/div[1]/div/div[3]',timeout=2)
+                if welcome_ele:
+                    if welcome_ele.text == 'Log in with your OpenAI account to continue': break
+                
+                self.driver.refresh()
+            
+            # self.driver.close()
+            # break
             time.sleep(random.randint(5,10))
             while True:
                 print('111')
