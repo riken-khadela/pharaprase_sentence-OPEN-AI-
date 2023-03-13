@@ -81,4 +81,3 @@ class SeprateText:
                         )
                 print(TextObj.id,':',TextObj.text)
                 
-        

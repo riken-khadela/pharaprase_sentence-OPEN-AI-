@@ -1,4 +1,6 @@
+from logging import exception
 import profile
+from xml.dom import UserDataHandler
 from django.core.management.base import BaseCommand
 import undetected_chromedriver as uc
 from selenium.webdriver.common.by import By
@@ -8,24 +10,45 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException,
 import time, random, pandas as pd
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
-import pyautogui, json
-from .models import Text as TxtObj, ParaphrasedText
+import  json, os
+
+from urllib3 import Retry
+from .models import Text as TxtObj, ParaphrasedText, user_details
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
+from dotenv import load_dotenv
+from .sms import get_number,get_sms,ban_number
+load_dotenv()
 
+
+import importlib.util
+
+def execute_code_from_file(file_path, **kwargs):
+    # Load the code from the file
+    spec = importlib.util.spec_from_file_location("module.name", file_path)
+    module = importlib.util.module_from_spec(spec)
+    # Pass the keyword arguments to the module
+    for key, value in kwargs.items():
+        module.__dict__[key] = value
+    spec.loader.exec_module(module)
 
 class Bot:
-    # def __init__(self):
-    #     ...
-            
-    def get_driver(self) :
-        options = webdriver.ChromeOptions()
+    def __init__(self):
+        self.all_response_text = []
+        self.email = os.getenv('EMAIL').replace('@gmail.com','')+'+'+str(random.randint(10000,99999))+'@gmail.com'
+        self.password = os.getenv('PASSWORD')
         
-        options.add_argument(f"--user-data-dir=Profiles") 
-        options.add_argument(f'--profile-directory=Default')
+        
+    def get_driver(self,profile_name='Default',profileDict = 'Profiles') :
+        options = webdriver.ChromeOptions()
+        profile_name = str(profile_name)
+        self.profile = profile_name
+        options.add_argument(f"--user-data-dir={profileDict}") 
+        options.add_argument(f'--profile-directory={profile_name}')
         # options.headless = True
         self.driver = uc.Chrome(use_subprocess=True,options=options)
+        self.driver.maximize_window()
         # self.driver = webdriver.Chrome(ChromeDriverManager().install())
         
         # profile = webdriver.FirefoxProfile('Profiles_FF')
@@ -44,12 +67,12 @@ class Bot:
         try:
             if timeout > 0:
                 wait_obj = WebDriverWait(self.driver, timeout)
-                #  ele = wait_obj.until(
-                #          EC.presence_of_element_located(
-                #              (locator_type, locator)))
                 ele = wait_obj.until(
-                        condition_func((locator_type, locator),
-                            *condition_other_args))
+                         EC.presence_of_element_located(
+                             (locator_type, locator)))
+                # ele = wait_obj.until(
+                #         condition_func((locator_type, locator),
+                #             *condition_other_args))
             else:
                 print(f'Timeout is less or equal zero: {timeout}')
                 ele = self.driver.find_element(by=locator_type,
@@ -88,68 +111,7 @@ class Bot:
             print(f'Inputed "{text}" for the element: {element}')
             return ele    
     
-    def login_account(self):
-
-        login_page = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
-        login_page_text = login_page.text
-
-        if str(login_page_text).upper() == "Log in with your OpenAI account to continue".upper():
-
-            login_button = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[4]/button[1]')
-            login_button.click()
-
-            while True:
-                try:
-                    login_next_page = self.driver.find_element(By.XPATH,'/html/body/main/section/div/div/header/h1')
-                    login_next_page_text = login_next_page.text
-                    if str(login_next_page_text).upper() == "Welcome back".upper():
-                        break
-                except:
-                    pass
-            
-            email_box = self.driver.find_element(By.XPATH,'//*[@id="username"]')
-            email_box.send_keys("lathipushpa024@gmail.com")
-
-            continue_btn_one = self.driver.find_element(By.XPATH,'/html/body/main/section/div/div/div/form/div[2]/button')
-            continue_btn_one.click()
-            
-            while True:
-                try:
-                    password_page = self.driver.find_element(By.XPATH,'/html/body/main/section/div/div/header/h1')
-                    password_page_text = password_page.text
-                    if str(password_page_text).upper() == "Enter your password".upper():
-                        break
-                except:
-                    pass
-            
-            password_box = self.driver.find_element(By.XPATH,'//*[@id="password"]')
-            password_box.send_keys("Bhavin@123")
-
-            continue_btn_two = self.driver.find_element(By.XPATH,'/html/body/main/section/div/div/div/form/div[2]/button')
-            continue_btn_two.click()
-            
-            time.sleep(random.randint(5,10))
-
-            label_find = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[1]/h2/b')
-            label_find_text = label_find.text
-            if str(label_find_text).upper() == "ChatGPT".upper():
-                next_buttom_one = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button')
-                next_buttom_one.click()
-                time.sleep(random.randint(1,3))
-                next_buttom_two = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]')
-                next_buttom_two.click()
-                
-                time.sleep(random.randint(1,3))
-                next_buttom_three = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]')
-                next_buttom_three.click()
-
-            time.sleep(random.randint(5,10))
-            # label # //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[1]/h2/b # <b>ChatGPT</b>
-            # //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button
-
-            # //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]
-            # //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]
-            
+    
 
     def change_window(self,index=0):
         AllWindow = self.driver.window_handles
@@ -163,358 +125,407 @@ class Bot:
                 self.driver.switch_to.window(window)
                 break
         
-
+    def login_gmail(self):
+        ele = self.find_element('Input Field','//*[@id="identifierId"]')
+        if ele:
+            self.input_text(os.getenv('EMAIL'),'Input Field','//*[@id="identifierId"]')
+            self.click_element('Next btn','//*[@id="identifierNext"]/div/button')
+        self.random_sleep()
+        
+        ele2 = self.find_element('password Field','//*[@id="password"]/div[1]/div/div[1]/input')
+        if ele2:
+            self.input_text(os.getenv('PASSWORD'),'Input Field','//*[@id="password"]/div[1]/div/div[1]/input')
+            self.click_element('Next btn','//*[@id="passwordNext"]/div/button')
+        self.random_sleep()
+        
+    def verify_email(self):
+        for _ in range(5):
+            
+            verify_enail = self.find_element('Verify email','//*[@id="root"]/div[1]/div/div[2]/h1')
+            if verify_enail:
+                if verify_enail.text == "Verify your email":
+                    break
+        self.click_element('Open Gmail','//*[@id="root"]/div[1]/div/div[2]/a')
+        self.change_window(-1)
+        self.driver.get('https://mail.google.com/mail/u/0/#all')
+        
+        # for i in range(1,6):
+        #     # email = self.find_element(f'Check email : {i}',f'/html/body/div[7]/div[3]/div/div[2]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div/div[4]/div[1]/div/table/tbody/tr[{i}]/td[4]/div[2]/span/span',timeout=3)
+        #     email = self.find_element(f'Check email : {i}',f'/html/body/div[7]/div[3]/div/div[2]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div/div[8]/div/div[1]/div[2]/div/table/tbody/tr[{i}]/td[4]/div[2]/span/span',timeout=3)
+        #     if email:
+        #         if email.get_attribute('email') == "noreply@tm.openai.com":
+        #             email.click()
+        #             break
+        # else :
+        # //*[@id=":1q"]    //*[@id=":1q"]
+        # //*[@id=":1q"]
+        # //*[@id=":36"]
+        # //*[@id=":3j"]
+        self.random_sleep()
+        breakpoint()
+        try:self.click_element('first email','//*[@id=":1q"]')
+        except : ...
+        self.driver.get('https://mail.google.com/mail/u/0/#all/FMfcgzGslbBmcWsKCsZSmFFtPJwnWMhS')
+        verify_link = ''
+        self.random_sleep()
+        for link in self.driver.find_elements(By.TAG_NAME,'a'):
+            try:
+                if link.get_attribute('data-saferedirecturl'):
+                    if "verify email address" in link.text.lower():
+                        verify_link = link.get_attribute('href')
+            except : ...
+                        
+            if verify_link : break
+        # self.driver.refresh()
+        
+        self.click_element('delete email','/html/body/div[7]/div[3]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div[1]/div/div[2]/div[3]')
+        self.driver.get(verify_link)
+        
+    def random_sleep(self,x1=5,x2=8):
+        rr = random.randint(x1,x2)
+        print(f'time sleep : {rr}')
+        time.sleep(rr)
+        
     def get_new_email(self):
         
-        if len(self.driver.window_handles) < 2:
-            self.driver.tab_new('https://yopmail.com')
-        self.change_window()
-        
-        self.click_element('Random Email Genrator','//*[@id="listeliens"]/a[1]')
-        self.click_element('New Email','/html/body/div/div[2]/main/div/div[2]/div/div[1]/div[2]/button[1]')
-        time.sleep(5)
-        self.email = self.find_element('Email','geny',By.ID).text
-        return self.email
+        self.driver.tab_new('https://mail.google.com/mail/u/0/#all')
+        self.change_window(1)
+        self.random_sleep()
+        login_btn = self.find_element('sign in btn','/html/body/header/div/div/div/a[2]',timeout=3)
+        if login_btn:
+            if login_btn.text == 'Sign in':
+                login_btn.click()
+                self.login_gmail()
 
     def get_new_password(self,length=random.randint(8,12)):
         import string,random
         self.password = ''.join(random.choices(string.ascii_letters + string.digits + string.punctuation, k=length))
         return self.password
+    
+    def email_check(self):
+        
+        self.get_driver(profile_name = 'Gmail')
+        self.driver.get('https://chat.openai.com/chat')
+        self.driver.quit()
+        ...
 
-    def singup(self):
-        self.get_driver()
+    def get_ready_number_page(self):
+        
+        for _ in range(3):
+            very_numberH1 = self.find_element('verify number h1','/html/body/div[1]/div[1]/div/div[2]/h1')
+            if very_numberH1:
+                if very_numberH1.text == "Verify your phone number":
+                    break
+                
+        self.click_element('No whatsapp','//*[@id="whatsapp-opt-in"]/label[2]')
+        self.click_element('Country drop down','//*[@id="root"]/div[1]/div/div[2]/form/div[1]/div/div[1]/div/div[2]/div')
+        
+        for _ in range(3):
+            time.sleep(3)
+            aa = self.find_element('dd','css-1de7owd-menu',By.CLASS_NAME,timeout=7)
+            if aa : 
+                aa = aa.find_elements(By.XPATH,'//*')
+                break
+        try:
+            
+            for i in aa:
+                ele_text = i.text
+                if not ele_text: continue
+                try: 
+                    if 'Malaysia' == i.text :
+                        i.click()
+                        break
+                except Exception as e: print(e,'-1111')
+        except Exception as e: print(e,'-2222')
+
+    def singup(self,profile_name=''):
+        print('11')
+        self.get_driver(profile_name )
+        
+        self.driver.get('https://myaccount.google.com/')
+        
+        check_account = self.find_element('check account','/html/body/header/div[1]/div[5]/ul/li[2]/a',timeout=5)
+        if check_account : 
+            if check_account.text == 'Go to Google Account': 
+                check_account.click()
+                account_added = self.login_gmail()
         self.driver.get('https://chat.openai.com/chat')
         
-        while True:
+        for _ in range(50):
+                self.driver.refresh()
                 welcome_ele = self.find_element('Welcome','//*[@id="__next"]/div[1]/div/div[3]',timeout=2)
                 if welcome_ele:
                     if welcome_ele.text == 'Log in with your OpenAI account to continue': break
-                
-                self.driver.refresh()
-        
+            
+        else:
+            self.CloseDriver()
+            return
         # time.sleep(random.randint(5,10))
-        breakpoint()
         
         self.click_element('Sign up btn','//*[@id="__next"]/div[1]/div/div[4]/button[2]')
-        
+        self.random_sleep()
         create_acc_h1 = self.find_element('Create acc H1','/html/body/main/section/div/div/header/h1')
         if create_acc_h1:
             if 'Create your account' in create_acc_h1.text:
-                self.get_new_email()
-                self.change_window(0)
-                self.input_text(self.email,'Email input','//*[@id="email"]')
-                self.click_element('Continue','/html/body/main/section/div/div/div/form/div[2]/button')
-                self.input_text(self.get_new_password(),'Password Input','//*[@id="password"]')
-                self.click_element('Continue','/html/body/main/section/div/div/div/form/div[2]/button')
+                # self.get_new_email()
+                # self.change_window(0)
+                break_outer = False
+                for _ in range(3):
+                    
+                    toomany = self.find_element('too many signups','/html/body/main/section/div/div/div/div[1]/p',timeout=3)
+                    if toomany:
+                        if toomany.text == 'Too many signups from the same IP':
+                            return False
+                    
+                    self.input_text(self.email,'Email input','//*[@id="email"]')
+                    self.click_element('Continue','/html/body/main/section/div/div/div/form/div[3]/button')
+                    self.random_sleep()
+                    self.input_text(self.get_new_password(),'Password Input','//*[@id="password"]')
+                    self.click_element('Continue','/html/body/main/section/div/div/div/form/div[3]/button')
                 
-                
-                
-        
-        login_page = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
-        login_page_text = login_page.text
-
-        if str(login_page_text).upper() == "Log in with your OpenAI account to continue".upper():
-
-            signup_button = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[4]/button[2]')
-            signup_button.click()
-
-            signup_lable = self.driver.find_element(By.XPATH, "/html/body/main/section/div/div/header/h1")
-            signup_lable_text = signup_lable.text
-
-            if signup_lable_text.upper() == "Create your account".upper():
-                email_box = self.driver.find_element(By.XPATH,'//*[@id="email"]')
-                email_box.send_keys("email")
-
-                continue_button_one = self.driver.find_element(By.XPATH,"/html/body/main/section/div/div/div/form/div[2]/button")
-                continue_button_one.click()
-
-                password_box = self.driver.find_element(By.XPATH,'//*[@id="password"]')
-                password_box.send_keys()
-
-                continue_button_two = self.driver.find_element(By.XPATH,"/html/body/main/section/div/div/div/form/div[2]/button")
-                continue_button_two.click()
-
-                verify_label = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/h1')
-                verify_label_text = verify_label.text
-
-                if verify_label_text.upper() == "Verify your email".upper():
-
-                    self.driver.refresh()
-
-                    tell_name_page_label = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/h1')
-                    tell_name_page_label_text = tell_name_page_label.text
-
-                    if tell_name_page_label_text.upper() == "Tell us about you".upper():
-
-                        first_name_box = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/form/div/div/div[1]/input')
-                        first_name_box.send_keys("fisrt name")
-
-                        last_name_box = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/form/div/div/div[2]/input')
-                        last_name_box.send_keys("fisrt name")
-
-                        continue_button_three = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/form/button')
-                        continue_button_three.click()
-
-                        verify_phonenumber_label = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/h1')
-                        verify_phonenumber_label_text = verify_phonenumber_label.text
-
-                        if verify_phonenumber_label_text.upper() == "Verify your phone number".upper():
-
-                            phone_number_box = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/form/div[1]/div/div[2]/input')
-                            phone_number_box.send_keys("phone number")
-
-                            whatsapp_no_btn = self.driver.find_element(By.XPATH,'//*[@id="whatsapp-opt-in-radio-no"]')
-                            whatsapp_no_btn.click()
-
-                            sendcode_button = self.driver.find_element(By.XPATH,'//*[@id="root"]/div[1]/div/div[2]/form/button')
-                            sendcode_button.click()
-                            
-
-            
-
-    def work(self):
-        print("dasdasd")
-        
-        for i in TxtObj.objects.all() :
-            print("dasdasd---",i)
-            self.get_driver()
-            self.driver.get('https://chat.openai.com/chat')
-            breakpoint()
-            
-            while True:
-                capacity = self.find_element('High capacity','//*[@id="__next"]/div[1]/div/div/div[1]/div[1]',timeout=2)
-                if capacity:
-                    if 'capacity' in capacity.text.lower():
-                        continue
-                
-                # Log in with your OpenAI account to continue
-                
-                welcome_ele = self.find_element('Welcome','//*[@id="__next"]/div[1]/div/div[3]',timeout=2)
-                if welcome_ele:
-                    if welcome_ele.text == 'Log in with your OpenAI account to continue': break
-                
-                self.driver.refresh()
-            
-            # self.driver.close()
-            # break
-            time.sleep(random.randint(5,10))
-            while True:
-                print('111')
-                try:
-                    print('1')
-
-                    verify_one = self.driver.find_element(By.XPATH,'//*[@id="cf-stage"]/div[6]/label')
-                    verify_text = verify_one.text
-                    if str(verify_text).upper() == "Verify you are human".upper():
-                        verify_box = self.driver.find_element(By.XPATH,'//*[@id="cf-stage"]/div[6]/label/span')
-                        verify_box.click()
-                except:
-                    print('2')
-                    try:
-                        verify_two = self.driver.find_element(By.XPATH,'//*[@id="challenge-stage"]/div/input')
-                        verify_two_text = verify_two.get_attribute("value")
-
-                        if str(verify_two_text).upper() == "Verify you are human".upper():
-                            verify_two.click()
-                    except:
-                        print('3')
-                        pass
-                
-                try:
-                    print('4')
-                    home_page = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div[1]/main/div[1]/div/div/div/div[1]/h1')
-                    home_page_text = home_page.text
-                    if str(home_page_text).upper() == "ChatGPT".upper():
-                        break
-                except:
-                    print('5')
-                    try:
-                        session_expired = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-title-:r4:"]')
-                        session_expired_text = session_expired.text
-                        if str(session_expired_text).upper() ==  "Your session has expired".upper():
-                            break
-                    except:
-                        print('6')
-                        try:
-                            login_page = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
-                            login_page_text = login_page.text
-                            print(":::----->",login_page_text)
-                            if str(login_page_text).upper() == "Log in with your OpenAI account to continue".upper():
+                    for _ in range(3):
+                        verify_enail = self.find_element('Verify email','//*[@id="root"]/div[1]/div/div[2]/h1')
+                        if verify_enail:
+                            if verify_enail.text == "Verify your email":
+                                break_outer = True
                                 break
-                        except Exception as e:
-                            print(str(e))
-                            print('7')
-                            try:
-                                sound_btn = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r1:"]/div[3]/button')
-                                sound_btn_text = sound_btn.text
-                                if str(sound_btn_text).upper() == "Sounds good!".upper():
-                                    break
-                            except:
-                                print('8')
-                                pass
+                    if break_outer:break
 
-            try:
-                print('9')
-                session_expired = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-title-:r4:"]')
-                session_expired_text = session_expired.text
-                if str(session_expired_text).upper() ==  "Your session has expired".upper():
-                    session_expired_loginbtn = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r3:"]/div[2]/button')
-                    session_expired_loginbtn.click()
-                    time.sleep(random.randint(5,10))
-                    self.login_account()
-            except:
-                print('10')
-                pass
+                self.verify_email()
+                
+                
+        self.change_window(-1)
+        self.input_text('Fiestname','First name','//*[@id="root"]/div[1]/div/div[2]/form/div/div/div[1]/input')
+        self.input_text('lastnamw','last name','//*[@id="root"]/div[1]/div/div[2]/form/div/div/div[2]/input')
+        time.sleep(2)
+        self.click_element('Continue','//*[@id="root"]/div[1]/div/div[2]/form/button')
+        
+        
+        sent_otp = False
+        get_otp = False
+        # get mobile number
+        for _ in range(3):
+            for i in range(5):
+                
+                number = get_number()
+                if not number : continue
+                self.get_ready_number_page()
+                splited_number = number[2:]
+                self.input_text(splited_number,'Phone number','//*[@id="root"]/div[1]/div/div[2]/form/div[1]/div/div[2]/input')
+                self.click_element('send sms','/html/body/div[1]/div[1]/div/div[2]/form/button')
+                
+                self.random_sleep()
+                code_sent_confirmation = self.find_element('enter code','/html/body/div[1]/div[1]/div/div[2]/h1',timeout=30)
+                if code_sent_confirmation:
+                    if code_sent_confirmation.text == 'Enter code': 
+                        sent_otp = True
+                        break
+                    else : self.click_element('Go back','/html/body/div[1]/div[1]/div/div[3]')
+                else : self.click_element('Go back','/html/body/div[1]/div[1]/div/div[3]',timeout=0)
+                
+            if not sent_otp : 
+                ban_number(number)
+                self.click_element('Go back','/html/body/div[1]/div[1]/div/div[3]')
+                continue
+                
+            for _ in range(3):
+                print(f'trying to get otp : {_+1} Time')
+                otp = get_sms(number)
+                if otp : 
+                    get_otp = True
+                    break
+            else: 
+                ban_number(number)
+                self.click_element('Go back','/html/body/div[1]/div[1]/div/div[3]')
 
-            try:
-                print('11')
-                login_page = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
-                login_page_text = login_page.text
-                print(":::----->",login_page_text)
-                if str(login_page_text).upper() == "Log in with your OpenAI account to continue".upper():
-                    self.login_account()
-            except Exception as e:
-                print('12')
-                print(str(e))
+            if get_otp : break
+        
+        
+        self.input_text(otp,'otp input','/html/body/div[1]/div[1]/div/div[2]/form/div/div/input')
+        
+        self.random_sleep(10,15)
+        self.driver.refresh()
+        self.click_element('Next btn','/html/body/div[3]/div/div/div/div[2]/div/div/div[2]/div[4]/button')
+        self.click_element('Next btn','/html/body/div[3]/div/div/div/div[2]/div/div/div[2]/div[4]/button[2]')
+        self.click_element('Next btn','/html/body/div[3]/div/div/div/div[2]/div/div/div[2]/div[4]/button[2]')
+        
+        userr = user_details.objects.create(
+            email = self.email,
+            password = self.password,
+            profile = self.profile
+        )
+        
+        userr.ProfileDict = str(int(userr.id%10))
+        userr.save()
+        
+        self.click_element('log out','/html/body/div[1]/div[1]/div[2]/div/div/nav/a[5]')
 
-            # input("sdbasjkd")
-            # try:
-            #     login_page = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div/div[3]')
-            #     login_page_text = login_page.text
-            #     if str(login_page_text).upper() == "Log in with your OpenAI account to continue".upper():
-            #         self.login_account()
-            # except:
-            #     pass
+        self.random_sleep(20,50)
+                            
+                            
+    def sign_in(self,UserEmail,UserPassword):
+        self.click_element('Login btn','//*[@id="__next"]/div[1]/div/div[4]/button[1]')
+        self.input_text(UserEmail,'Username input','//*[@id="username"]')
+        self.click_element('Continue','/html/body/main/section/div/div/div/form/div[2]/button')
+        self.input_text(UserPassword,'password input','//*[@id="password"]')
+        self.click_element('Continue','/html/body/main/section/div/div/div/form/div[2]/button')
 
-            try:
-                print('13')
-                sound_btn = self.driver.find_element(By.XPATH,'//*[@id="headlessui-dialog-panel-:r1:"]/div[3]/button')
-                sound_btn_text = sound_btn.text
-                if str(sound_btn_text).upper() == "Sounds good!".upper():
-                    sound_btn.click()
-            except:
-                pass
-
-
-            time.sleep(random.randint(5,10))
-            # input("jbb")
-            Text = i.text
-            # Text = "where is the park?"
-            print(Text)
-
-            # if ('document.querySelector("#cf-stage > div.ctp-checkbox-container > label > span").click();')
+    def pharaprase_text(self,number=50,Text='',another=False,add_into_list=False, response=0,pharaprase=True):
+        for i in range(3):
             textArea = self.find_element('text area','/html/body/div/div/div[1]/main/div[2]/form/div/div[2]/textarea') # /html/body/div/div/div[1]/main/div[2]/form/div/div[2]/textarea
             action = ActionChains(self.driver)
             action.move_to_element(textArea)
             action.click()
-            par = 'paraphrase thirty times the following sentence '
-            for letter in par:
-                # time.sleep(0.5)
-                action.send_keys(letter)
-                action.pause(0.1)
-                action.perform()
-            
-            # action.perform()
-            # breakpoint()
-            # action.keyDown(Keys.SHIFT).sendKeys(Keys.RETURN).build().perform()
-            # action.send_keys(Keys.SHIFT + Keys.ENTER)
-            # action.perform()
-            action.send_keys('"')
+            par = f'paraphrase {random.randint(15,20)} times the following sentence ' if not another else f''
+            Text = f'more {random.randint(15,20)} times' if another else f'{par} "{Text}"'
             for letter in Text:
-                # time.sleep(0.5)
                 action.send_keys(letter)
                 action.pause(0.1)
                 action.perform()
-            action.send_keys('".')
-            action.perform()
             self.click_element('send btn','//*[@id="__next"]/div/div[1]/main/div[2]/form/div/div[2]/button')
-            # time.sleep(120)
             self.click_element('scroll down','//*[@id="__next"]/div/div[1]/main/div[1]/div/div/button',timeout=1)
             
             all_chat = self.driver.find_elements(By.XPATH,'//*[@id="__next"]/div/div[1]/main/div[1]/div/div/div/*')
             last_ele = all_chat.pop()
-            not_found_bool = False
-            while True:
-                print('222')
+            self.not_found_bool = False
+            for _ in range(30):
+                # Errors_ele = self.find_element('Erros','//*[@id="__next"]/div[1]/div[1]/main/div[1]/div/div/div/div[2]/div/div[2]/div[1]/div/div/p')
+                # if Errors_ele:
+                #     if "I'm sorry" or "Too many requests in 1 hour. Try again later." or "I apologize" or "Sorry" in Errors_ele.text :
+                #         self.not_found_bool = True                
+                #         break
+                
+                # if len(latest_responses) >= number: break
+                # else : time.sleep(10)
+                
                 try:
-                    abc = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div[1]/main/div[1]/div/div/div/div[2]/div/div[2]/div[1]/div/div/p')
-                    if abc!= None:
-                        if "I'm sorry" in abc.text :
-                            not_found_bool = True
+                    RegenrateResponse = self.find_element('ReGenrate Response','//*[@id="__next"]/div[1]/div[1]/main/div[2]/form/div/div[1]/button')
+                    if RegenrateResponse:
+                        if RegenrateResponse.text == 'Regenerate response' :
                             break
-                        if "Too many requests in 1 hour. Try again later." in abc.text:
-                            time.sleep(60)
-                            break
-                        if "I apologize" in abc.text:
-                            not_found_bool = True
-                            break
-                        if "Sorry" in abc.text:
-                            not_found_bool = True
-                            break
-                except:
-                    try:
-                        abc = self.driver.find_element(By.XPATH,'//*[@id="__next"]/div[1]/div[1]/main/div[1]/div/div/div/div[2]/div/div[1]/div[1]/span')
-                        if abc != None:
-                            break
-                    except:
-                        pass
+                        else:
+                            time.sleep(random.randint(3,9))
+                            
+                except Exception as e :
+                    print(e)
+                
+                    
+                    
+                First_text = all_chat[-1].find_elements(By.XPATH,'//div/div[2]/div[1]/div/div/ol/*')[0]
+                if First_text.text.startswith("I'm sorry") or First_text.text.startswith("I apologize") :
+                    break
+            response = 0
+            
+            all_chat = self.driver.find_elements(By.XPATH,'//*[@id="__next"]/div/div[1]/main/div[1]/div/div/div/*')
+            last_ele = all_chat.pop()
+            latest_responses = all_chat[-1].find_elements(By.XPATH,'//div/div[2]/div[1]/div/div/ol/*')
+            for __ in latest_responses:
+                response+=1
+            return response
+             
+    def AddPraprasedSentenceIntoList(self):
+        all_chat = self.driver.find_elements(By.XPATH,'//*[@id="__next"]/div/div[1]/main/div[1]/div/div/div/*')
+        last_ele = all_chat.pop()
+        latest_responses = all_chat[-1].find_elements(By.XPATH,'//div/div[2]/div[1]/div/div/ol/*')
+        for response in latest_responses:
+            self.all_response_text.append(response.text)
 
-                latest_responses = all_chat[-1].find_elements(By.XPATH,'//div/div[2]/div[1]/div/div/ol/*')
-                print(len(latest_responses))
-                if len(latest_responses) >= 30: break
-                else : time.sleep(10)
-            if not_found_bool == False:
+    def work(self,UserEmail,UserPassword):
+        
+        self.driver.get('https://chat.openai.com/chat')
+        while True:
+            time.sleep(3)
+            capacity = self.find_element('High capacity','//*[@id="__next"]/div[1]/div/div/div[1]/div[1]',timeout=2)
+            if capacity:
+                if 'capacity' in capacity.text.lower():
+                    self.driver.refresh()
+                    continue
+            break                
+
+        login_btn = self.find_element('Login btn','//*[@id="__next"]/div[1]/div/div[4]/button[1]',timeout=2)
+        if login_btn:
+            if login_btn.text == 'Log in':
+                self.sign_in(UserEmail,UserPassword)
+                self.click_element('Next pop up btn','//*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button',timeout=2)
+                self.click_element('Next2 pop up btn','//*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]',timeout=2)
+                self.click_element('Done pop up btn','//*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]',timeout=2)
+        
+        session_expired = self.find_element('Login expires','//*[@id="headlessui-dialog-title-:r2:"]')
+        if session_expired :
+            if session_expired.text == 'Your session has expired':
+                self.click_element('Login','/html/body/div[3]/div/div/div/div[2]/div/div/div[2]/button')
+                self.sign_in(UserEmail,UserPassword)
+                self.click_element('Next pop up btn','//*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button',timeout=2)
+                self.click_element('Next2 pop up btn','//*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]',timeout=2)
+                self.click_element('Done pop up btn','//*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]',timeout=2)
+                
+        
+        time.sleep(random.randint(5,10))
+
+        verify_one = self.find_element('Captcha','//*[@id="cf-stage"]/div[6]/label',timeout=2)
+        if verify_one:
+            if str(verify_one.text).upper() == "Verify you are human".upper():
+                self.click_element('Verify box','//*[@id="cf-stage"]/div[6]/label/span',timeout=3)
+
+        verify_two = self.click_element('Verify2','//*[@id="challenge-stage"]/div/input',timeout=2)
+        if verify_two:
+            if str(verify_two.text).upper() == "Verify you are human".upper():
+                verify_two.click()
+            
+        
+        sounds_good = self.find_element('Sounds good','//*[@id="headlessui-dialog-panel-:r1:"]/div[3]/button',timeout=3)
+        if sounds_good:
+            if sounds_good.text.upper() == "Sounds good!".upper():
+                sounds_good.click()
+                
+        count_sentence = 0
+        for _ in range(random.randint(10,20)):
+            self.all_response_text = []
+            count_sentence+=1
+            text = TxtObj.objects.filter(pharaphreased="NOT_DONE").first() 
+            text.pharaphreased = "RUNNING"
+            text.save()
+            time.sleep(random.randint(5,10))
+            Text = text.text
+            print(Text)
+            
+            response = 0
+            self.pharaprase_text(Text=Text,response=response)
+            for i in range(6):
+                response = self.pharaprase_text(number=random.randint(10,15),Text=Text,another=True,response=response)
+                if response > 50: break
+            
+            print('response',response)
+            self.AddPraprasedSentenceIntoList()
+                
+
+            if self.not_found_bool == False:
                 number_count = 1
                 
 
                 PageTitle = self.driver.title
-                breakpoint()
-                for response in latest_responses :
-                    print(response.text)
+                for response in self.all_response_text :
+                    print(number_count,response)
                     ParaphrasedText.objects.create(
-                        sentence = i,
-                        response = response.text,
+                        sentence = text,
+                        response = response,
                         PageTitle = PageTitle,
                         number = number_count 
                     )
                     number_count += 1
                     
-                    
-            self.CloseDriver()
-        
+                text.pharaphreased = "DONE"
+                text.save()
+            
+            self.click_element('Clear conversation','//*[@id="__next"]/div[1]/div[2]/div/div/nav/a[2]')
+            time.sleep(2)
+            self.click_element('Confirm clear conversation','//*[@id="__next"]/div[1]/div[2]/div/div/nav/a[2]')
+            self.driver.refresh()
+            # self.CloseDriver()
+            # self.get_driver()
+            # self.driver.get('https://chat.openai.com/chat')
+        self.CloseDriver()
+
     def CloseDriver(self):
-        # breakpoint()
-        # input('Enter :')
-        self.driver.quit()
-
-
-
-# label # //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[1]/h2/b # <b>ChatGPT</b>
-# //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button
-
-# //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]
-# //*[@id="headlessui-dialog-panel-:r1:"]/div[2]/div[4]/button[2]
-
-# verify box # //*[@id="cf-stage"]/div[6]/label
-
-# verify box click # //*[@id="cf-stage"]/div[6]/label/span
-
-# verify input # //*[@id="challenge-stage"]/div/input # document.querySelector("#challenge-stage > div > input[type=button]") # <input type="button" value="Verify you are human" style="margin: 0px; cursor: pointer;">
-
-# session expired # label:- //*[@id="headlessui-dialog-title-:r4:"] # <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-200" id="headlessui-dialog-title-:r4:" data-headlessui-state="open">Your session has expired</h3>
-# session expired # login button:- //*[@id="headlessui-dialog-panel-:r3:"]/div[2]/button # <button class="btn flex justify-center gap-2 btn-neutral" tabindex="0">Log in</button>
-
-
-# login page # label :- //*[@id="__next"]/div[1]/div/div[3] # <div class="mb-4 text-center">Log in with your OpenAI account to continue</div>
-# login page # login button :- //*[@id="__next"]/div[1]/div/div[4]/button[1]  #  <button class="btn flex justify-center gap-2 btn-primary">Log in</button>
-
-# login next page # label:- /html/body/main/section/div/div/header/h1 # <h1 class="cc9990aac c3216fce5">Welcome back</h1>
-# login next page # email box:- //*[@id="username"] #<input class="input ce09e4a4b ca6b0879c" inputmode="email" name="username" id="username" type="text" value="" required="" autocomplete="username" autocapitalize="none" spellcheck="false" autofocus="">
-# login next page # continue button:- /html/body/main/section/div/div/div/form/div[2]/button # <button type="submit" name="action" value="default" class="c8fca5323 cb6b7c993 cee1c07cc c850d9a60 _button-login-id">Continue</button>
-
-
-# login next page # google button:- /html/body/main/section/div/div/div/div[3]/form[2]/button # <button type="submit" class="c5b8edce6 c426c38e7 c723b33d7" data-provider="google"><span class="c7fe15dc1 c3bee28ca" data-provider="google"></span><span class="cc341260d">Continue with Google</span></button>
-# google next page # google login:- //*[@id="view_container"]/div/div/div[2]/div/div[1]/div/form/span/section/div/div/div/div/ul/li[1]/div # <div class="lCoei YZVTmd SmR8" role="link" tabindex="0" jsname="MBVUVe" data-authuser="0" data-identifier="rikenkhadela777@gmail.com" data-item-index="0" null=""><div class="d2laFc"><div class="tgnCOd"><div class="qQWzTd" aria-hidden="true"><img src="https://lh3.googleusercontent.com/-2kvS9bl5i3k/AAAAAAAAAAI/AAAAAAAAAAA/APmPUbFjJvsr9BTLfidWQxR1XgEb26lL5g/s128-c/photo.jpg" alt="" class="r78aae TrZEUc"></div><div class="WBW9sf"><div class="w1I7fb" jsname="V1ur5d">O - 154 Riken Khadela</div><div class="wLBAL" jsname="bQIQze" data-email="rikenkhadela777@gmail.com">rikenkhadela777@gmail.com</div></div></div></div><div class="n3x5Fb" aria-hidden="true"><svg aria-hidden="true" class="stUf5b" fill="currentColor" focusable="false" width="24px" height="24px" viewBox="0 0 24 24" xmlns="https://www.w3.org/2000/svg"><path d="M7 11v2h10v-2H7zm5-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path></svg></div></div>
-
-# sounds good popup # sounds good button # //*[@id="headlessui-dialog-panel-:r1:"]/div[3]/button # <button class="btn flex justify-center gap-2 btn-primary" tabindex="0">Sounds good!</button>
-#sounds good popup box html # <div class="fixed inset-0 z-50 overflow-y-auto"><div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0"><div class="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:p-6 sm:max-w-sm opacity-100 translate-y-0 sm:scale-100" id="headlessui-dialog-panel-:r1:" data-headlessui-state="open"><div class="flex items-center sm:flex"><div class="mt-3 text-center sm:mt-0 sm:text-left"></div></div><div class="mb-6 flex flex-col gap-6"><div class="text-gray-800 dark:text-white">Jan 30 version update</div><div class="text-2xl">Here's what's new</div><div class="prose text-base dark:prose-invert"><ul><li>We’ve upgraded the ChatGPT model with improved factuality and mathematical capabilities.</li></ul></div></div><div class="mt-5 flex flex-col gap-3 sm:mt-4 sm:flex-row-reverse"><button class="btn flex justify-center gap-2 btn-primary" tabindex="0">Sounds good!</button></div></div></div></div>
+        try:self.driver.quit()
+        except : ...
