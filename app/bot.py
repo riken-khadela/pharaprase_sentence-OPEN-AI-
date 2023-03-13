@@ -106,6 +106,7 @@ class Bot:
         ele = self.find_element(element, locator, locator_type=locator_type,
                 timeout=timeout)
         if ele:
+            time.sleep(1)
             ele.clear()
             ele.send_keys(text)
             print(f'Inputed "{text}" for the element: {element}')
@@ -149,35 +150,28 @@ class Bot:
         self.change_window(-1)
         self.driver.get('https://mail.google.com/mail/u/0/#all')
         
-        # for i in range(1,6):
-        #     # email = self.find_element(f'Check email : {i}',f'/html/body/div[7]/div[3]/div/div[2]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div/div[4]/div[1]/div/table/tbody/tr[{i}]/td[4]/div[2]/span/span',timeout=3)
-        #     email = self.find_element(f'Check email : {i}',f'/html/body/div[7]/div[3]/div/div[2]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div/div[8]/div/div[1]/div[2]/div/table/tbody/tr[{i}]/td[4]/div[2]/span/span',timeout=3)
-        #     if email:
-        #         if email.get_attribute('email') == "noreply@tm.openai.com":
-        #             email.click()
-        #             break
-        # else :
-        # //*[@id=":1q"]    //*[@id=":1q"]
-        # //*[@id=":1q"]
-        # //*[@id=":36"]
-        # //*[@id=":3j"]
-        self.random_sleep()
+        for i in range(1,6):
+            # email = self.find_element(f'Check email : {i}',f'/html/body/div[7]/div[3]/div/div[2]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div/div[4]/div[1]/div/table/tbody/tr[{i}]/td[4]/div[2]/span/span',timeout=3)
+            email = self.find_element(f'Check email : {i}',f'/html/body/div[7]/div[3]/div/div[2]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div/div[8]/div/div[1]/div[2]/div/table/tbody/tr[{i}]/td[4]/div[2]/span/span',timeout=3)
+            if email:
+                if email.get_attribute('email') == "noreply@tm.openai.com":
+                    email.click()
+                    break
+        else :
+            self.click_element('First email','/html/body/div[7]/div[3]/div/div[2]/div[2]/div/div/div/div/div[2]/div/div[1]/div/div[2]/div[4]/div[1]/div/table/tbody/tr[1]')
+
         breakpoint()
-        try:self.click_element('first email','//*[@id=":1q"]')
-        except : ...
-        self.driver.get('https://mail.google.com/mail/u/0/#all/FMfcgzGslbBmcWsKCsZSmFFtPJwnWMhS')
         verify_link = ''
-        self.random_sleep()
-        for link in self.driver.find_elements(By.TAG_NAME,'a'):
-            try:
-                if link.get_attribute('data-saferedirecturl'):
-                    if "verify email address" in link.text.lower():
-                        verify_link = link.get_attribute('href')
-            except : ...
-                        
-            if verify_link : break
-        # self.driver.refresh()
-        
+        try:
+            for link in self.driver.find_elements(By.TAG_NAME,'a'):
+                try:
+                    if link.get_attribute('data-saferedirecturl'):
+                        if "verify email address" in link.text.lower():
+                            verify_link = link.get_attribute('href')
+                except : ...
+                            
+                if verify_link : break
+        except Exception as e:print(e)
         self.click_element('delete email','/html/body/div[7]/div[3]/div/div[2]/div[2]/div/div/div/div/div[1]/div/div[1]/div/div[2]/div[3]')
         self.driver.get(verify_link)
         
@@ -250,7 +244,9 @@ class Bot:
                 check_account.click()
                 account_added = self.login_gmail()
         self.driver.get('https://chat.openai.com/chat')
-        
+        self.random_sleep()
+        self.click_element('log out','/html/body/div[1]/div[1]/div[2]/div/div/nav/a[5]')
+        self.random_sleep()
         for _ in range(50):
                 self.driver.refresh()
                 welcome_ele = self.find_element('Welcome','//*[@id="__next"]/div[1]/div/div[3]',timeout=2)
@@ -529,3 +525,48 @@ class Bot:
     def CloseDriver(self):
         try:self.driver.quit()
         except : ...
+        
+    def email_check(self):
+        
+        
+        from selenium import webdriver
+        from selenium.webdriver.common.keys import Keys
+        from selenium.webdriver.common.by import By
+        from selenium.webdriver.support.ui import WebDriverWait
+        from selenium.webdriver.support import expected_conditions as EC
+        import time
+
+        # Webmail settings
+        webmail_url = 'https://mail.google.com'
+        email_address = 'your_email_address@gmail.com'
+        email_password = 'your_email_password'
+
+        # Create a new instance of the Firefox driver
+        driver = webdriver.Firefox()
+
+        # Navigate to the webmail URL
+        driver.get(webmail_url)
+
+        # Enter email address and password
+        email_input = driver.find_element_by_id('identifierId')
+        email_input.send_keys(email_address)
+        email_input.send_keys(Keys.RETURN)
+        time.sleep(2)
+        password_input = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "password")))
+        password_input.send_keys(email_password)
+        password_input.send_keys(Keys.RETURN)
+
+        # Wait for the inbox to load and select the latest email
+        inbox_link = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[href*='inbox']")))
+        inbox_link.click()
+        latest_email_link = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".zA.zE")))
+        latest_email_link.click()
+
+        # Retrieve the latest email subject and body
+        email_subject = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".hP")))
+        email_body = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".adO .ii.gt div")))
+        print('Latest email subject:', email_subject.text)
+        print('Latest email body:', email_body.text)
+
+        # Close the browser window
+        driver.quit()
