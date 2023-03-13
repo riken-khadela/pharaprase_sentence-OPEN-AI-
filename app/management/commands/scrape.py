@@ -25,7 +25,9 @@ class Command(BaseCommand):
         
     def handle(self, *args, **options):
         ThreadNumber = int(options.get('n'))
+        print(ThreadNumber)
         ThreadNumber = self.get_lowest_number(ThreadNumber)
+        print(ThreadNumber)
         if ThreadNumber > 51: 
             print('Please run threading system under number of 51')
             return
@@ -36,16 +38,17 @@ class Command(BaseCommand):
     
     def start_bot(self,i):
         while True:
-            user_ = user_details.objects.filter(ProfileDict=i).order_by('?')[0]
-            bot = Bot()
-            try: 
-                bot.get_driver(user_.profile,user_.ProfileDict)
-                bot.work(user_.email,user_.password)
-                
-            except Exception as e: print(e)
-            finally:
-                bot.CloseDriver()
-
+            try:
+                user_ = user_details.objects.filter(ProfileDict=i).order_by('?')[0]
+                bot = Bot()
+                try: 
+                    bot.get_driver(user_.profile,user_.ProfileDict)
+                    bot.work(user_.email,user_.password)
+                    
+                except Exception as e: print(e)
+                finally:
+                    bot.CloseDriver()
+            except : ...
     def get_lowest_number(self,num1):
         """
         Returns the lowest of two numbers
