@@ -1,6 +1,7 @@
 from tqdm import tqdm
 import json, os, re
 from .models import Text
+import random
 
 class SeprateText:
     
@@ -80,4 +81,3 @@ class SeprateText:
                             text = sentence
                         )
                 print(TextObj.id,':',TextObj.text)
-                

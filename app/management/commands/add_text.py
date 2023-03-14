@@ -71,37 +71,3 @@ class Command(BaseCommand):
     def handle(self, *args, **option):
 
         SeprateText()
-        
-        # max_len = 0
-        # max_word = ''
-        # ind = 0
-        # for sentences in tqdm(new_data):
-        #     for sentence in split_into_sentences(sentences):
-        #         ind += 1
-        #         # print(len(sentence))
-        #         # if ind < 55000 :                     
-        #         #     continue
-                
-        #         # if len(sentence) > 500:
-        #         #     print(".......")
-        #         #     continue
-        #         print(sentence)
-        #         matches = re.findall(
-        #             r'(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])', sentence)
-        #         print(matches,"mmmm")
-        #         # if len(matches) > 0:
-        #         #     continue
-        #         # if len(sentence) < 10:
-        #         #     continue    
-                
-        #         print("--->",sentence)
-                
-        #         aa=Text.objects.create(
-        #             text = sentence
-        #         )
-        #         print(aa)
-        #         # print(text)
-        #         # session.add(Original(sentence=sentence, text_number=ind))
-        #     # break
-        
-    

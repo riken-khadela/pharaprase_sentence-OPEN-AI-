@@ -13,6 +13,9 @@ else
 	python manage.py scrape
 endif
 
+add_data:
+	python manage.py add_text
+
 signup:
 # make create n=$$n
 ifdef n
