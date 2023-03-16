@@ -17,7 +17,7 @@ add_data:
 	python manage.py add_text
 
 signup:
-# make create n=$$n
+# make signup n=$$n
 ifdef n
 	python manage.py signup --n=$(n)
 else
