@@ -6,6 +6,10 @@ env:
 install: requirements.txt 
 	pip3 install -r requirements.txt 
 
+migrate:
+	python manage.py makemigrations
+	python manage.py migrate
+
 scrape:
 ifdef n
 	python manage.py scrape --n=$(n)
