@@ -37,7 +37,7 @@ class Bot:
     def __init__(self):
         self.all_response_text = []
         self.email = os.getenv('EMAIL').replace('@gmail.com','')+'+'+str(random.randint(10000,99999))+'@gmail.com'
-        self.password = os.getenv('PASSWORD')
+        self.password = os.getenv('EMAIL_PASSWORD')
         
     def get_driver(self,profile_name='Default',profileDict = 'Profiles') :
         options = webdriver.ChromeOptions()
