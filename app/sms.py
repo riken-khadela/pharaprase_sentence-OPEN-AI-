@@ -12,7 +12,7 @@ def get_number(pid='1331',country = 'my'):
             "action": "getmobile",
             
             "username": "pay@noborders.net",
-            "token": os.getenv('PASSWORD'),
+            "token": os.getenv('GET_TOKEN'),
             "pid": pid,
             "cocode":country
         }
@@ -33,7 +33,7 @@ def get_sms(phone_number, pid='1331',country = 'my'):
     payload = {
         "action": "getsms",
         "username": "pay@noborders.net",
-        "token": os.getenv('PASSWORD'),
+        "token": os.getenv('GET_TOKEN'),
         "pid": pid,
         "mobile": phone_number,
         "author": "pay@noborders.net",
@@ -56,7 +56,7 @@ def ban_number(phone_number, pid='1331',country = 'my'):
     payload = {
         "action": "addblack",
         "username": "pay@noborders.net",
-        "token": os.getenv('PASSWORD'),
+        "token": os.getenv('GET_TOKEN'),
         "pid": pid,
         "mobile": phone_number,
         "author": "pay@noborders.net",

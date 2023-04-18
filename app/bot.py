@@ -131,6 +131,7 @@ class Bot:
         
         ele2 = self.find_element('password Field','//*[@id="password"]/div[1]/div/div[1]/input')
         if ele2:
+            breakpoint()
             self.input_text(os.getenv('PASSWORD'),'Input Field','//*[@id="password"]/div[1]/div/div[1]/input')
             self.click_element('Next btn','//*[@id="passwordNext"]/div/button')
         self.random_sleep()
@@ -218,7 +219,8 @@ class Bot:
         if check_account : 
             if check_account.text == 'Go to Google Account': 
                 check_account.click()
-                account_added = self.login_gmail()
+                self.login_gmail()
+            breakpoint()
         self.driver.get('https://chat.openai.com/chat')
         LogOutbtn = self.click_element('log out','/html/body/div[1]/div[1]/div[2]/div/div/nav/a[5]')
         if LogOutbtn:self.random_sleep()
@@ -235,7 +237,7 @@ class Bot:
         
         self.click_element('Sign up btn','//*[@id="__next"]/div[1]/div/div[4]/button[2]')
         self.random_sleep()
-        create_acc_h1 = self.find_element('Create acc H1','/html/body/main/section/div/div/header/h1')
+        create_acc_h1 = self.find_element('Create acc H1','/html/body/div/main/section/div/div/header/h1')
         if create_acc_h1:
             if 'Create your account' in create_acc_h1.text:
                 # self.get_new_email()
@@ -249,10 +251,10 @@ class Bot:
                             return False
                     
                     self.input_text(self.email,'Email input','//*[@id="email"]')
-                    self.click_element('Continue','/html/body/main/section/div/div/div/form/div[3]/button')
+                    self.click_element('Continue','/html/body/div/main/section/div/div/div/div[1]/div/form/div[3]/button')
                     self.random_sleep()
                     self.input_text(self.get_new_password(),'Password Input','//*[@id="password"]')
-                    self.click_element('Continue','/html/body/main/section/div/div/div/form/div[3]/button')
+                    self.click_element('Continue','/html/body/div/main/section/div/div/div/form/div[3]/button')
                 
                     for _ in range(3):
                         verify_enail = self.find_element('Verify email','//*[@id="root"]/div[1]/div/div[2]/h1')
